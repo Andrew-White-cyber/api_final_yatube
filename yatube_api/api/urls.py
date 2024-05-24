@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter
-from django.urls import include, path
+from django.urls import include
 
 from .views import PostsViewSet, GroupViewSet, CommentsViewSet, FollowViewSet
 

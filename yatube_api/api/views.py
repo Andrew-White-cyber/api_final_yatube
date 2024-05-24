@@ -1,18 +1,29 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, mixins, permissions, status
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework import viewsets, mixins, status
+from rest_framework.permissions import (
+    IsAuthenticated,
+    AllowAny,
+    IsAuthenticatedOrReadOnly
+)
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework import filters, generics
+from rest_framework import filters
 from django.contrib.auth import get_user_model
 
 from posts.models import Post, Comment, Group, Follow
-from .serializers import PostSerializer, CommentSerializer, GroupSerializer, FollowSerializer, UserSerializer
+from .serializers import (
+    PostSerializer,
+    CommentSerializer,
+    GroupSerializer,
+    FollowSerializer,
+)
 from .permissions import IsAuthorOrReadOnly
 
 User = get_user_model()
 
+
 class PostsViewSet(viewsets.ModelViewSet):
+    """ВьюСет для модели публикаций."""
 
     queryset = Post.objects.all()
     serializer_class = PostSerializer
@@ -23,7 +34,9 @@ class PostsViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
     def get_paginated_response(self, data):
-        if 'limit' not in self.request.query_params:
+        """Пагинация только с параметрами limit или offset."""
+        if ('limit' not in self.request.query_params
+                or 'offset' not in self.request.query_params):
             return Response(data)
         return Response(
             {
@@ -32,7 +45,7 @@ class PostsViewSet(viewsets.ModelViewSet):
                 "previous": self.paginator.get_previous_link(),
                 "results": data,
             }
-            )
+        )
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
@@ -67,10 +80,13 @@ class FollowCreateList(
     mixins.ListModelMixin,
     viewsets.GenericViewSet
 ):
+    """Собственный базовый класс для ВьюСета подписок."""
+
     pass
 
 
 class FollowViewSet(FollowCreateList):
+    """ВьюСет для модели подписок."""
 
     queryset = Follow.objects.all()
     serializer_class = FollowSerializer
@@ -83,22 +99,23 @@ class FollowViewSet(FollowCreateList):
         return queryset
 
     def create(self, request):
+        """Пользователь не может подписаться на самого себя."""
         serializer = FollowSerializer(data=request.data)
         user = User.objects.get(id=request.user.id)
-        following = user.followers.all()
-        # breakpoint()
+        followings = user.followers.all()
         if serializer.is_valid():
-            for follow in following:
-                # breakpoint()
-                if serializer.validated_data['following'].username == follow.following.username:
-                    return Response(status=status.HTTP_400_BAD_REQUEST)
-            if serializer.validated_data['following'].username == request.user.username:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
+            following = serializer.validated_data['following'].username
+            for follow in followings:
+                if following == follow.following.username:
+                    return Response(
+                        "Вы уже подписаны на данного пользователя !",
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            if following == request.user.username:
+                return Response(
+                    "Нельзя подписаться на самого себя !",
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             serializer.save(user=self.request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
