@@ -44,6 +44,17 @@ python3 manage.py runserver
 ### Примеры запросов:
 
 ```
+POST api/v1/jwt/create/
+```
+
+```
+Response {
+"username": "string",
+"password": "string"
+}
+```
+
+```
 GET api/v1/posts/
 ```
 
@@ -66,7 +77,8 @@ Response {
 ```
 
 ```
-POST api/v1/posts/
+Возвращает все подписки пользователя, сделавшего запрос. Анонимные запросы запрещены.
+POST api/v1/posts/ 
 ```
 ```
 Response {
@@ -75,3 +87,17 @@ Response {
 "group": 0
 }
 ```
+
+```
+GET api/v1/follow/
+```
+
+```
+Response [
+{
+"user": "string",
+"following": "string"
+}
+]
+```
+
