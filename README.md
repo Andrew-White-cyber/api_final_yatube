@@ -60,3 +60,11 @@ Response {
     }
   ]
 }
+
+POST http://127.0.0.1:8000/api/v1/posts/
+
+Response {
+"text": "string",
+"image": "string",
+"group": 0
+}
