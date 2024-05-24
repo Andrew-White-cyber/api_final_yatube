@@ -105,6 +105,7 @@ Response [
 ```
 
 ```
+Получение всех комментариев к публикации.
 GET api/v1/posts/{post_id}/comments/
 ```
 
