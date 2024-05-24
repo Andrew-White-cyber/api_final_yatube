@@ -43,8 +43,11 @@ python3 manage.py runserver
 ```
 ### Примеры запросов:
 
-GET http://127.0.0.1:8000/api/v1/posts/
+```
+GET api/v1/posts/
+```
 
+```
 Response {
   "count": 123,
   "next": "http://api.example.org/accounts/?offset=400&limit=100",
@@ -60,11 +63,15 @@ Response {
     }
   ]
 }
+```
 
-POST http://127.0.0.1:8000/api/v1/posts/
-
+```
+POST api/v1/posts/
+```
+```
 Response {
 "text": "string",
 "image": "string",
 "group": 0
 }
+```
