@@ -38,14 +38,7 @@ class PostsViewSet(viewsets.ModelViewSet):
         if ('limit' not in self.request.query_params
                 or 'offset' not in self.request.query_params):
             return Response(data)
-        return Response(
-            {
-                "count": self.paginator.count,
-                "next": self.paginator.get_next_link(),
-                "previous": self.paginator.get_previous_link(),
-                "results": data,
-            }
-        )
+        return super().get_paginated_response(data)
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
@@ -75,47 +68,27 @@ class CommentsViewSet(viewsets.ModelViewSet):
         return post.comments.all()
 
 
-class FollowCreateList(
+class FollowViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     viewsets.GenericViewSet
-):
-    """Собственный базовый класс для ВьюСета подписок."""
-
-    pass
-
-
-class FollowViewSet(FollowCreateList):
+     ):
     """ВьюСет для модели подписок."""
 
-    queryset = Follow.objects.all()
     serializer_class = FollowSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [filters.SearchFilter]
     search_fields = ('following__username',)
 
     def get_queryset(self):
-        queryset = Follow.objects.filter(user=self.request.user)
-        return queryset
+        return Follow.objects.filter(user=self.request.user)
 
     def create(self, request):
-        """Пользователь не может подписаться на самого себя."""
-        serializer = FollowSerializer(data=request.data)
-        user = User.objects.get(id=request.user.id)
-        followings = user.followers.all()
+        serializer = FollowSerializer(
+            data=request.data,
+            context={'request': request}
+        )
         if serializer.is_valid():
-            following = serializer.validated_data['following'].username
-            for follow in followings:
-                if following == follow.following.username:
-                    return Response(
-                        "Вы уже подписаны на данного пользователя !",
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-            if following == request.user.username:
-                return Response(
-                    "Нельзя подписаться на самого себя !",
-                    status=status.HTTP_400_BAD_REQUEST
-                )
             serializer.save(user=self.request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

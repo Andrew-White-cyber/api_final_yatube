@@ -7,7 +7,7 @@ from .views import PostsViewSet, GroupViewSet, CommentsViewSet, FollowViewSet
 router_v1 = SimpleRouter()
 router_v1.register(r'posts', PostsViewSet)
 router_v1.register(r'groups', GroupViewSet)
-router_v1.register(r'follow', FollowViewSet)
+router_v1.register(r'follow', FollowViewSet, basename='follow')
 router_v1.register(
     r'posts/(?P<post_id>\d+)/comments',
     CommentsViewSet,

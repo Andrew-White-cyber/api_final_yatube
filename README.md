@@ -127,3 +127,19 @@ Response [
 }
 ]
 ```
+
+```
+POST api/v1/follow/
+Payload:
+  {
+  "following": "string"
+  }
+```
+
+```
+Response {
+"user": "string",
+"following": "string"
+}
+
+```
