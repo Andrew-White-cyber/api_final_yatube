@@ -83,12 +83,10 @@ class FollowViewSet(
     def get_queryset(self):
         return Follow.objects.filter(user=self.request.user)
 
-    def create(self, request):
-        serializer = FollowSerializer(
-            data=request.data,
-            context={'request': request}
-        )
-        if serializer.is_valid():
-            serializer.save(user=self.request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def get_serializer_context(self):
+        return {
+            'request': self.request,
+        }
