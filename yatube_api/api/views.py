@@ -72,7 +72,7 @@ class FollowViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     viewsets.GenericViewSet
-     ):
+):
     """ВьюСет для модели подписок."""
 
     serializer_class = FollowSerializer
